@@ -27,6 +27,12 @@ class Trajectory:
 
         self.trajectory = trajectory
 
+    def get_origin(self,) -> Point:
+        line = tuple(self.trajectory.iloc[0].geometry)[0]
+        points_array = np.column_stack(line.coords.xy)
+        point = Point(*points_array[0,:2])
+        return point
+
     def at_offset(self, offset : float) -> Point:
         """Given an offset in meters, returns the coordinates at the given 
         position.

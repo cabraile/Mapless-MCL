@@ -2,6 +2,7 @@ import os
 from typing import Iterable
 
 import pandas as pd
+from shapely.geometry import Point
 import geopandas as gpd
 import pyproj
 
@@ -19,11 +20,17 @@ class HLMap:
         gdf, utm_crs = project_geodataframe_to_best_utm(gdf)
         
         # Split the "other_tags" to new columns
-        other_tags_dataframe = gdf.other_tags.apply( lambda tag : pd.Series(tag_as_dict(tag)) )
+        other_tags_dataframe = gdf.other_tags.apply( lambda tag : pd.Series(tag_as_dict(tag), dtype=object) )
         
         # Store
         self.crs = utm_crs
         self.roadmap_layer = gpd.GeoDataFrame(pd.concat([gdf,other_tags_dataframe],axis="columns")).drop(columns=["other_tags"]).set_index("osm_id")
+
+    def get_origin(self,) -> Point:
+        """Computes the extreme minimum coordinates of the map."""
+        bounds = self.roadmap_layer.total_bounds
+        min_x, min_y = bounds[:2]
+        return Point(min_x, min_y)
 
     def get_crs(self) -> pyproj.CRS:
         return self.crs

@@ -23,7 +23,20 @@ class DRMCL:
         """
         u = control_array.flatten()
         noise_array = np.random.multivariate_normal( mean=np.zeros_like(u), cov=covariance , size=len(self.offsets))
-        self.offsets = self.offsets + u[0].reshape(1,-1) + noise_array
+        displacement = u[0]#np.linalg.norm(u)
+        self.offsets = self.offsets + displacement + noise_array[:,0]
+
+    def get_particles(self, trajectories : List[Trajectory ]) -> Tuple[List[Point]]:
+        """Returns the particles in the XY plane"""
+        points = []
+        for trajectory in trajectories:
+            # Retrieve the particles that belong to the given trajectory
+            offsets = self.offsets[ np.where( self.trajectories == trajectory.id ) ]
+
+            # Compute the position of each particle in the trajectory
+            points += [ trajectory.at_offset(offset) for offset in offsets ]
+
+        return points
 
     def get_position(self, trajectories : List[Trajectory]) -> Tuple[List[Point], List[np.ndarray]]:
         """Returns the estimated position and covariance for each trajectory provided."""
