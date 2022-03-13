@@ -23,8 +23,8 @@ class DRMCL:
         """
         u = control_array.flatten()
         noise_array = np.random.multivariate_normal( mean=np.zeros_like(u), cov=covariance , size=len(self.offsets))
-        displacement = u[0]#np.linalg.norm(u)
-        self.offsets = self.offsets + displacement + noise_array[:,0]
+        displacement = np.array( [ [np.linalg.norm(u)] ] * self.offsets.shape[0] )
+        self.offsets = self.offsets + displacement + noise_array[:,0].reshape(-1,1)
 
     def get_particles(self, trajectories : List[Trajectory ]) -> Tuple[List[Point]]:
         """Returns the particles in the XY plane"""
