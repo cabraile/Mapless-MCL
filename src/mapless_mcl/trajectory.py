@@ -1,6 +1,7 @@
 import os
 from itertools import count
 import numpy as np
+import pyproj
 import geopandas as gpd
 from shapely.geometry import Point
 from mapless_mcl.geoutils import project_geodataframe_to_best_utm
@@ -20,13 +21,16 @@ class Trajectory:
         trajectory = gpd.GeoDataFrame.from_file(path).sort_values(by="seq_id")
         
         # Project to metric coordinates
-        trajectory, crs = project_geodataframe_to_best_utm(trajectory)
+        trajectory, self.crs = project_geodataframe_to_best_utm(trajectory)
         
         # Fill the cumulative offset
         trajectory["cumulative_offset"] = np.cumsum( [ line.length for line in trajectory.geometry ] )
 
         self.trajectory = trajectory
 
+    def get_crs(self, ) -> pyproj.CRS: 
+        return self.crs
+        
     def get_origin(self,) -> Point:
         line = tuple(self.trajectory.iloc[0].geometry)[0]
         points_array = np.column_stack(line.coords.xy)
