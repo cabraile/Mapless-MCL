@@ -1,6 +1,8 @@
 import os
 from itertools import count
+from typing import List
 import numpy as np
+import pandas as pd
 import pyproj
 import geopandas as gpd
 from shapely.geometry import Point
@@ -37,6 +39,17 @@ class Trajectory:
         point = Point(*points_array[0,:2])
         return point
 
+    def get_reference_osm_ids(self,) -> pd.Series:
+        return self.trajectory.ref_osm_id
+
+    def get_rows_by_sequence_ids(self, ids : List[int]) -> pd.DataFrame:
+        return self.trajectory.seq_id[self.trajectory.seq_id.isin(ids)]
+
+    def sequence_at_offset(self, offset : float) -> int:
+        """Returns the sequence-id at the provided offset."""
+        ids = np.where( offset < self.trajectory.cumulative_offset )[0]
+        return ids[0]
+        
     def at_offset(self, offset : float) -> Point:
         """Given an offset in meters, returns the coordinates at the given 
         position.

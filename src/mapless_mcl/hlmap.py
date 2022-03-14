@@ -26,6 +26,9 @@ class HLMap:
         self.crs = utm_crs
         self.roadmap_layer = gpd.GeoDataFrame(pd.concat([gdf,other_tags_dataframe],axis="columns")).drop(columns=["other_tags"]).set_index("osm_id")
 
+    def get_by_osm_ids(self, ids : Iterable ) -> gpd.GeoDataFrame:
+        return self.roadmap_layer[self.roadmap_layer.osm_id.isin(ids)]
+
     def get_origin(self,) -> Point:
         """Computes the extreme minimum coordinates of the map."""
         bounds = self.roadmap_layer.total_bounds
