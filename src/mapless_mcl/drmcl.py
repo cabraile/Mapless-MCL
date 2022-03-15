@@ -118,8 +118,8 @@ class DRMCL:
             default_detection_min_distance = 0.5 # Minimum distance from intersection for expecting detection
             default_detection_max_distance = 2.0 # Maximum distance from intersection for expecting detection
         else:
-            default_detection_min_distance = 1.0 # Minimum distance from intersection for expecting detection
-            default_detection_max_distance = 15.0 # Maximum distance from intersection for expecting detection
+            default_detection_min_distance = -1.0 # Minimum distance from intersection for expecting detection
+            default_detection_max_distance = 10.0 # Maximum distance from intersection for expecting detection
 
         intersections_at_offsets = self.features["intersections"]
         
