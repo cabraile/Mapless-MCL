@@ -27,7 +27,13 @@ class HLMap:
         self.roadmap_layer = gpd.GeoDataFrame(pd.concat([gdf,other_tags_dataframe],axis="columns")).drop(columns=["other_tags"]).set_index("osm_id")
 
     def get_by_osm_ids(self, ids : Iterable ) -> gpd.GeoDataFrame:
-        return self.roadmap_layer[self.roadmap_layer.osm_id.isin(ids)]
+        return self.roadmap_layer.loc[ids]
+
+    def geometry(self) -> gpd.GeoSeries:
+        return self.roadmap_layer.geometry
+
+    def get_roadmap_linestrings(self) -> gpd.GeoSeries:
+        return self.roadmap_layer.geometry
 
     def get_origin(self,) -> Point:
         """Computes the extreme minimum coordinates of the map."""

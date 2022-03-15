@@ -1,5 +1,7 @@
 from typing import List
 
+from shapely.geometry import Point
+
 from mapless_mcl.trajectory import Trajectory
 from mapless_mcl.hlmap import HLMap
 import numpy as np
@@ -18,14 +20,47 @@ def associate_observed_speed_limit(
             ids.append(i)
     return ids
 
-def associate_stop_signs(trajectory : Trajectory, hlmap : HLMap) -> List[float]:
-    """Observed a stop sign, which means that there must be an intersection 
+def associate_found_intersection_evidence(
+    trajectory : Trajectory, hlmap : HLMap
+) -> List[float]:
+    """Observed a stop sign or traffic light, which means that there must be an intersection 
     nearby.
     
     Retrieves the list of offsets in the trajectory in which roads intersect.
     """
-    pass
+    roadmap_linestrings = hlmap.get_roadmap_linestrings()
+    offsets = []
 
+    for seq_id, line in enumerate( trajectory.get_linestrings() ):
+
+        # The street where the current trajectory element is referenced
+        sequence_element_row = trajectory.at_sequence_id(seq_id)
+        ref_osm_id = sequence_element_row["ref_osm_id"]
+        reference_street_linestring = hlmap.get_by_osm_ids([ref_osm_id]).geometry.iloc[0]
+
+        # Get intersection points in the road map
+        intersection_indices = roadmap_linestrings.sindex.query(reference_street_linestring, predicate='intersects')
+        intersection_series = roadmap_linestrings.iloc[intersection_indices].intersection(reference_street_linestring, align=True,)
+        intersection_series = intersection_series[ ~intersection_series.is_empty ]
+        
+        # Include the intersection points to the ids
+        # - Note that the intersection of the reference street with self 
+        # returns a LineString geometry, so it is ignored.
+        for geometry in intersection_series:
+
+            if isinstance(geometry,Point):
+                # Ignores geometries that are too far from the line
+                if geometry.distance(line) >= 10.0:
+                    continue 
+                offset_in_trajectory_linestring = line.project(geometry)
+
+                # Ignores points after the trajectory bounds
+                if offset_in_trajectory_linestring >= line.length:
+                    continue
+                offset_until_trajectory_linestring = trajectory.offset_at_sequence_id(seq_id)
+                offsets.append(offset_in_trajectory_linestring + offset_until_trajectory_linestring)
+                
+    return offsets
 
 def associate_observed_one_way_sign( trajectory : Trajectory, hlmap : HLMap ) -> List[float]:
     """Observed a one-way sign, which 
