@@ -99,3 +99,5 @@ class Trajectory:
     def at_sequence_id(self, seq_id : int ) -> gpd.GeoSeries:
         trajectory = self.trajectory.sort_values(by="seq_id")
         return trajectory.iloc[seq_id]
+
+        

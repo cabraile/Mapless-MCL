@@ -16,6 +16,9 @@ class DRMCL:
         self.offsets = None
         self.hlmap = None
         self.trajectory = None
+        self.features = {
+            "intersections" : {}
+        }
 
     # Data flow
     # =========================================================================
@@ -25,6 +28,10 @@ class DRMCL:
 
     def assign_trajectory(self, trajectory : Trajectory) -> None:
         self.trajectory = trajectory
+
+    def load_trajectory_intersections(self) -> None:
+        # TODO: refactor the function... feels weird
+        self.features["intersections"] = associate_found_intersection_evidence(self.trajectory, self.hlmap)
 
     def get_particles(self) -> List[Point]:
         """Returns the particles in the XY plane"""
@@ -114,7 +121,7 @@ class DRMCL:
             default_detection_min_distance = 1.0 # Minimum distance from intersection for expecting detection
             default_detection_max_distance = 15.0 # Maximum distance from intersection for expecting detection
 
-        intersections_at_offsets = associate_found_intersection_evidence(self.trajectory, self.hlmap)
+        intersections_at_offsets = self.features["intersections"]
         
         # Find which particles belong to the intersection range and which don't
         mask = np.full_like( self.offsets, False, dtype=bool )
