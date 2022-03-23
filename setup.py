@@ -5,5 +5,5 @@ setup(
     description="Mapless Monte-Carlo Localization implementation approaches",
     package_dir={"" : "src"},
     packages=["mapless_mcl", "mapless_demos"],
-    install_requires = ["numpy", "shapely", "pyproj", "geopandas", "utm", "scipy", "matplotlib"]
+    install_requires = ["numpy>=1.18.5", "shapely", "pyproj", "geopandas", "utm", "scipy", "matplotlib", "python-dateutil>=2.8.1"]
 )
